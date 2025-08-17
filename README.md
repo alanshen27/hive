@@ -1,4 +1,3 @@
-project overview, setup instructions, usage instructions, and contribution guidelines. Can use the one from the devpost descs
 
 ## Project Overview
 Too many students study alone. Hive helps connect students across borders and language barriers, offering a solution to students in environments lacking support needing to chase their dreams alone.
