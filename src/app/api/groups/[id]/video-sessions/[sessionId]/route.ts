@@ -5,10 +5,10 @@ import { auth } from '@/lib/auth'
 // GET /api/video-sessions/[id] - Get a specific video session
 export async function GET(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
-    const sessionId = params.sessionId
+    const { sessionId } = await params
     const videoSession = await prisma.videoSession.findUnique({
       where: { id: sessionId },
       include: {
@@ -53,10 +53,10 @@ export async function GET(
 // PUT /api/video-sessions/[id] - Update a video session
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
-    const sessionId = params.sessionId
+    const { sessionId } = await params
     const body = await request.json()
     const { title, description, startTime, endTime, meetingUrl, status } = body
 
@@ -105,10 +105,10 @@ export async function PUT(
 // DELETE /api/video-sessions/[id] - Delete a video session
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
-    const sessionId = params.sessionId
+    const { sessionId } = await params
 
     await prisma.videoSession.delete({
       where: { id: sessionId }

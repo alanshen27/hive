@@ -6,10 +6,10 @@ import { uploadFile } from '@/lib/google-cloud-storage'
 // GET /api/groups/[id]/milestones/[milestoneId]/submissions - Get submissions for a milestone
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string, milestoneId: string } }
+  {params}: { params: Promise<{ id: string, milestoneId: string }> }
 ) {
   try {
-    const milestoneId = params.milestoneId
+    const { milestoneId } = await params
 
     const submissions = await prisma.milestoneSubmission.findMany({
       where: { milestoneId },
@@ -50,7 +50,7 @@ export async function GET(
 // POST /api/groups/[id]/milestones/[milestoneId]/submissions - Submit work for a milestone
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string, milestoneId: string } }
+  {params}: { params: Promise<{ id: string, milestoneId: string }> }
 ) {
   try {
     const session = await auth()
@@ -61,8 +61,7 @@ export async function POST(
       )
     }
 
-    const milestoneId = params.milestoneId
-    const groupId = params.id
+    const { milestoneId, id: groupId } = await params
     
     // Handle both FormData (with files) and JSON (text only)
     let content = ''

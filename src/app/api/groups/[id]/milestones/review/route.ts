@@ -4,7 +4,6 @@ import { generateContent } from "@/lib/inference";
 import { pusher } from "@/lib/pusher";
 
 export async function POST(request: NextRequest) {
-    console.log("REVIEW STRARTEDs")
   const { submissionId } = await request.json();
 
   const submission = await prisma.milestoneSubmission.findUnique({

@@ -5,10 +5,10 @@ import { auth } from '@/lib/auth'
 // GET /api/groups/[id]/video-sessions - Get all video sessions for a group
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const groupId = params.id
+    const { id: groupId } = await params
 
     const videoSessions = await prisma.videoSession.findMany({
       where: {
@@ -52,7 +52,7 @@ export async function GET(
 // POST /api/groups/[id]/video-sessions - Create a new video session
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -63,7 +63,7 @@ export async function POST(
       )
     }
 
-    const groupId = params.id
+    const { id: groupId } = await params
     const body = await request.json()
     const { title, description, startTime, endTime, meetingUrl } = body
 

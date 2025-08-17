@@ -6,7 +6,7 @@ import { auth } from '@/lib/auth'
 // POST /api/video-sessions/[id]/join - Join a video session
 export async function POST(
   request: NextRequest,
-  { params }: { params: { sessionId: string } }
+  {params}: { params: Promise<{ sessionId: string }> }
 ) {
   try {
     const session = await auth()
@@ -17,7 +17,7 @@ export async function POST(
       )
     }
 
-    const videoSessionId = params.sessionId
+    const { sessionId: videoSessionId } = await params
 
     // Check if video session exists
     const videoSession = await prisma.videoSession.findUnique({

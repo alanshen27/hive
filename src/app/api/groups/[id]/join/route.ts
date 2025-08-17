@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -15,7 +15,7 @@ export async function POST(
       );
     }
 
-    const groupId = params.id;
+    const { id: groupId } = await params
 
     // Check if group exists and is public
     const group = await prisma.group.findUnique({

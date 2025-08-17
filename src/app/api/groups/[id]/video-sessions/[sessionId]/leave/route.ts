@@ -6,7 +6,7 @@ import { auth } from '@/lib/auth'
 // POST /api/groups/[id]/video-sessions/[sessionId]/leave - Leave a video session
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string, sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
 
   try {
@@ -18,7 +18,7 @@ export async function POST(
       )
     }
 
-    const videoSessionId = params.sessionId
+    const { sessionId: videoSessionId } = await params
     const userId = session.user.id
 
     // Check if video session exists

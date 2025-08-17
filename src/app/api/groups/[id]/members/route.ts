@@ -4,11 +4,12 @@ import { prisma } from '@/lib/prisma'
 // GET /api/groups/[id]/members - Get all members of a group
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  {params}: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const members = await prisma.groupMember.findMany({
-      where: { groupId: params.id },
+      where: { groupId: id },
       include: {
         user: {
           select: {
@@ -38,9 +39,10 @@ export async function GET(
 // POST /api/groups/[id]/members - Add a member to a group
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  {params}: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const { userId, role = 'member' } = body
 
@@ -53,7 +55,7 @@ export async function POST(
 
     // Check if group exists and has space
     const group = await prisma.group.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         _count: {
           select: { members: true }
@@ -80,7 +82,7 @@ export async function POST(
       where: {
         userId_groupId: {
           userId,
-          groupId: params.id
+          groupId: id
         }
       }
     })
@@ -95,7 +97,7 @@ export async function POST(
     const member = await prisma.groupMember.create({
       data: {
         userId,
-        groupId: params.id,
+        groupId: id,
         role
       },
       include: {

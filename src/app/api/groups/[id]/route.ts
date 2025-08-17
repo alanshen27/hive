@@ -4,11 +4,11 @@ import { prisma } from '@/lib/prisma'
 // GET /api/groups/[id] - Get a specific group with all details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const group = await prisma.group.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       include: {
         owner: {
           select: {
@@ -118,14 +118,14 @@ export async function GET(
 // PUT /api/groups/[id] - Update a group
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await request.json()
     const { name, description, subject, level, isPrivate, maxMembers } = body
 
     const group = await prisma.group.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: {
         name,
         description,
@@ -158,11 +158,11 @@ export async function PUT(
 // DELETE /api/groups/[id] - Delete a group
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await prisma.group.delete({
-      where: { id: params.id }
+      where: { id: (await params).id }
     })
 
     return NextResponse.json({ message: 'Group deleted successfully' })

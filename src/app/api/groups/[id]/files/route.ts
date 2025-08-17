@@ -5,10 +5,10 @@ import { uploadFile } from '@/lib/google-cloud-storage'
 // GET /api/groups/[id]/files - Get all files for a group
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const groupId = params.id
+    const { id: groupId } = await params
 
     const files = await prisma.file.findMany({
       where: {
@@ -41,14 +41,13 @@ export async function GET(
 // POST /api/groups/[id]/files - Upload a new file
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const groupId = params.id
+    const { id: groupId } = await params
     
     // Handle both FormData (file upload) and JSON (metadata)
     let fileData: any = {}
-    let uploadedFile: any = null
     
     const contentType = request.headers.get('content-type') || ''
     

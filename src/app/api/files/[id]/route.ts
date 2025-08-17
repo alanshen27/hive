@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { auth } from '@/lib/auth'
 
 // GET /api/files/[id] - Get a specific file
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  {params}: { params: Promise<{ id: string }> }
 ) {
   try {
-    const fileId = params.id
+    const { id } = await params
+    const fileId = id
 
     const file = await prisma.file.findUnique({
       where: { id: fileId },
@@ -42,10 +44,11 @@ export async function GET(
 // PUT /api/files/[id] - Update a file
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  {params}: { params: Promise<{ id: string }> }
 ) {
   try {
-    const fileId = params.id
+    const { id } = await params
+    const fileId = id
     const body = await request.json()
     const { name, url, size, type } = body
 
@@ -81,10 +84,11 @@ export async function PUT(
 // DELETE /api/files/[id] - Delete a file
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  {params}: { params: Promise<{ id: string }> }
 ) {
   try {
-    const fileId = params.id
+    const { id } = await params
+    const fileId = id
 
     await prisma.file.delete({
       where: { id: fileId }

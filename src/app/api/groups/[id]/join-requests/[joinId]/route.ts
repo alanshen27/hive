@@ -6,7 +6,7 @@ import { auth } from '@/lib/auth'
 // PUT /api/join-requests/[id] - Approve or reject a join request
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { joinId: string } }
+  { params }: { params: Promise<{ joinId: string }> }
 ) {
   try {
     const session = await auth()
@@ -17,7 +17,7 @@ export async function PUT(
       )
     }
 
-    const joinRequestId = params.joinId
+    const { joinId: joinRequestId } = await params
     const body = await request.json()
     const { action } = body // 'approve' or 'reject'
 

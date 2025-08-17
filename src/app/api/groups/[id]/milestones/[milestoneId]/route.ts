@@ -5,10 +5,10 @@ import { auth } from '@/lib/auth'
 // GET /api/milestones/[id] - Get a specific milestone
 export async function GET(
   request: NextRequest,
-  { params }: { params: { milestoneId: string } }
+  {params}: { params: Promise<{ milestoneId: string }> }
 ) {
   try {
-    const milestoneId = params.milestoneId
+    const { milestoneId } = await params
 
     const milestone = await prisma.milestone.findUnique({
       where: { id: milestoneId },
@@ -66,7 +66,7 @@ export async function GET(
 // PUT /api/milestones/[id] - Update a milestone
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { milestoneId: string } }
+  {params}: { params: Promise<{ milestoneId: string }> }
 ) {
   try {
     const session = await auth()
@@ -77,7 +77,7 @@ export async function PUT(
       )
     }
 
-    const milestoneId = params.milestoneId
+    const { milestoneId } = await params
     const body = await request.json()
     const { title, description, dueDate, completed } = body
 
@@ -169,7 +169,7 @@ export async function PUT(
 // DELETE /api/milestones/[id] - Delete a milestone
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { milestoneId: string } }
+  {params}: { params: Promise<{ milestoneId: string }> }
 ) {
   try {
     const session = await auth()
@@ -180,7 +180,7 @@ export async function DELETE(
       )
     }
 
-    const milestoneId = params.milestoneId
+    const { milestoneId } = await params
 
     // First check if the milestone exists and get group information
     const existingMilestone = await prisma.milestone.findUnique({

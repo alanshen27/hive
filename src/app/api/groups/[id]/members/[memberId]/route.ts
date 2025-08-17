@@ -4,10 +4,10 @@ import { prisma } from '@/lib/prisma'
 // GET /api/groups/[id]/members/[memberId] - Get a specific member
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string; memberId: string } }
+  {params}: { params: Promise<{ id: string; memberId: string }> }
 ) {
   try {
-    const { id: groupId, memberId } = params
+    const { id: groupId, memberId } = await params
 
     const member = await prisma.groupMember.findFirst({
       where: {
@@ -45,10 +45,10 @@ export async function GET(
 // PUT /api/groups/[id]/members/[memberId] - Update member role
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string; memberId: string } }
+  {params}: { params: Promise<{ id: string; memberId: string }> }
 ) {
   try {
-    const { id: groupId, memberId } = params
+    const { id: groupId, memberId } = await params
     const body = await request.json()
     const { role } = body
 
@@ -83,10 +83,10 @@ export async function PUT(
 // DELETE /api/groups/[id]/members/[memberId] - Remove member from group
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; memberId: string } }
+  {params}: { params: Promise<{ id: string; memberId: string }> }
 ) {
   try {
-    const { id: groupId, memberId } = params
+    const { id: groupId, memberId } = await params
 
     await prisma.groupMember.delete({
       where: {

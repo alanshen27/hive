@@ -5,11 +5,11 @@ import { auth } from '@/lib/auth'
 // GET /api/users/[id] - Get user profile
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id: (await params).id },
       select: {
         id: true,
         email: true,
@@ -47,14 +47,14 @@ export async function GET(
 // PUT /api/users/[id] - Update user profile
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await request.json()
     const { name, avatar, bio, preferredLanguage } = body
 
     const user = await prisma.user.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: {
         name: name || undefined,
         avatar: avatar || undefined,
@@ -85,7 +85,7 @@ export async function PUT(
 // DELETE /api/users/[id] - Delete user account
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -94,13 +94,13 @@ export async function DELETE(
     }
 
     // Ensure user can only delete their own account
-    if (session.user.id !== params.id) {
+    if (session.user.id !== (await params).id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // Delete user (cascade will handle related data)
     await prisma.user.delete({
-      where: { id: params.id }
+      where: { id: (await params).id }
     });
 
     return NextResponse.json({ message: 'Account deleted successfully' });

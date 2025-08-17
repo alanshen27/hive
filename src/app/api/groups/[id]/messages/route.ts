@@ -9,16 +9,17 @@ import { NotificationService } from '@/lib/notification-service'
 // GET /api/groups/[id]/messages - Get messages for a group
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  {params}: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '50')
     const skip = (page - 1) * limit
     
     const messages = await prisma.message.findMany({
-      where: { groupId: params.id },
+      where: { groupId: id },
       include: {
         user: {
           select: {
@@ -34,7 +35,7 @@ export async function GET(
     })
 
     const total = await prisma.message.count({
-      where: { groupId: params.id }
+      where: { groupId: id }
     })
 
     return NextResponse.json({
@@ -61,9 +62,10 @@ export async function GET(
 // POST /api/groups/[id]/messages - Send a message to a group
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  {params}: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -86,7 +88,7 @@ export async function POST(
       where: {
         userId_groupId: {
           userId: session.user.id,
-          groupId: params.id
+          groupId: id
         }
       }
     })
@@ -102,7 +104,7 @@ export async function POST(
       data: {
         content,
         userId: session.user.id,
-        groupId: params.id,
+        groupId: id,
         isAI
       },
       include: {
@@ -118,7 +120,7 @@ export async function POST(
 
     const context = await prisma.message.findMany({
       where: {
-        groupId: params.id,
+        groupId: id,
         createdAt: {
           gte: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7)
         }
@@ -174,14 +176,14 @@ NOTE: in this context your name is "AI Assistant".
     ${contextString}
     `
     // Trigger Pusher event for real-time updates
-    await pusher.trigger(`group-${params.id}`, 'new-message', {
+    await pusher.trigger(`group-${id}`, 'new-message', {
       message
     });
 
     // Create notifications for other group members
     try {
       await NotificationService.notifyNewMessage(
-        params.id,
+        id,
         message.id,
         session.user.id,
         content
@@ -220,12 +222,12 @@ NOTE: in this context your name is "AI Assistant".
         data: {
           content: JSON.stringify({ text, action, data }),
           userId: session.user.id,
-          groupId: params.id,
+          groupId: id,
           isAI: true
         }
       });
 
-      await pusher.trigger(`group-${params.id}`, 'new-message', {
+      await pusher.trigger(`group-${id}`, 'new-message', {
         message: aiAssistantMessage
       })
     }
@@ -243,9 +245,10 @@ NOTE: in this context your name is "AI Assistant".
 // PATCH /api/groups/[id]/messages - Update a message (for confirming AI suggestions)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+    {params}: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
@@ -269,7 +272,7 @@ export async function PATCH(
       where: {
         userId_groupId: {
           userId: session.user.id,
-          groupId: params.id
+          groupId: id
         }
       }
     })
@@ -297,7 +300,7 @@ export async function PATCH(
     });
 
     // Trigger Pusher event for real-time updates
-    await pusher.trigger(`group-${params.id}`, 'message-updated', {
+    await pusher.trigger(`group-${id}`, 'message-updated', {
       message: updatedMessage
     });
 

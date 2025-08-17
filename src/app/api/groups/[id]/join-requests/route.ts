@@ -6,7 +6,7 @@ import { auth } from '@/lib/auth'
 // GET /api/groups/[id]/join-requests - Get join requests for a group (group leaders only)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -17,7 +17,7 @@ export async function GET(
       )
     }
 
-    const groupId = params.id
+    const { id: groupId } = await params
 
     // Check if user is the group leader
     const group = await prisma.group.findUnique({
@@ -81,7 +81,7 @@ export async function GET(
 // POST /api/groups/[id]/join-requests - Send a join request to a group
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth()
@@ -92,7 +92,7 @@ export async function POST(
       )
     }
 
-    const groupId = params.id
+    const { id: groupId } = await params
     const body = await request.json()
     const { message } = body
 
