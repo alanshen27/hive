@@ -1,8 +1,19 @@
 
 ## Project Overview
-Too many students study alone. Hive helps connect students across borders and language barriers, offering a solution to students in environments lacking support needing to chase their dreams alone.
+Too many students study alone. Hive helps connect students across borders and language barriers, offering a solution to students in environments lacking support needing to chase their dreams alone.  
+- Live demo: https://gohive.io  
+- Demo video: https://www.youtube.com/watch?v=GOrEYNVJnhw
 
 ## Setup Instructions
+
+**NOTE: There are three base example accounts generated on the live gohive.io demo.**
+
+| username | password |
+| ---- | -- |
+| alice@example.com | 123 |
+| bob@example.com | 123 |
+| carol@example.com | 123 |
+
 
 1. **Clone the repository:**
     ```
@@ -46,6 +57,7 @@ Too many students study alone. Hive helps connect students across borders and la
 ## Usage Instructions
 
 - **Sign up** or **log in** to create or join study groups.
+- **Complete the onboarding guide** so we can know you better
 - **Create milestones** for your group and track progress.
 - **Submit work** and receive AI-powered feedback and verification.
 - **Translate content** to your preferred language for a more inclusive experience.
