@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+project overview, setup instructions, usage instructions, and contribution guidelines. Can use the one from the devpost descs
 
-## Getting Started
+## Project Overview
+Too many students study alone. Hive helps connect students across borders and language barriers, offering a solution to students in environments lacking support needing to chase their dreams alone.
 
-First, run the development server:
+## Setup Instructions
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. **Clone the repository:**
+    ```
+    git clone https://github.com/alanshen27/hive.git
+    cd hive
+    ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Install dependencies:**
+    ```
+    npm install
+    ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Configure environment variables:**
+    - Copy `.env.example` to `.env.local` and fill in the required values (e.g., database URL, authentication secrets, API keys for translation, etc.).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+    - Note this program uses various third party resources. To run this locally, one must have the following in the env:
+        - A Google Cloud account with the following
+            - `GOOGLE_TRANSLATE_API_KEY` for the translating API
+            - `GOOGLE_CLOUD_*` credentials, see .env.example for more information
+        - `PUSHER_*` credentials, go to [Pusher.com](https://pusher.com) to obtain
+    - Keep the rest of the credentials as is for local developement
 
-## Learn More
+4.  **Set up the database:**
+    To setup the database
+    ```
+    npx prisma migrate dev
+    ```
+    To run the database
+    ```
+    npx prisma dev
+    ```
 
-To learn more about Next.js, take a look at the following resources:
+5. **Run the development server:**
+    ```
+    npm run dev
+    ```
+    The app will be available at [http://localhost:3000](http://localhost:3000).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Usage Instructions
 
-## Deploy on Vercel
+- **Sign up** or **log in** to create or join study groups.
+- **Create milestones** for your group and track progress.
+- **Submit work** and receive AI-powered feedback and verification.
+- **Translate content** to your preferred language for a more inclusive experience.
+- **Receive notifications** for group activity, submissions, and milestones.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+For a more detailed guide, refer to https://www.youtube.com/watch?v=GOrEYNVJnhw&ab_channel=Alan (1:42)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Contribution Guidelines
+
+We welcome contributions! [To get started](CONTRIBUTING.md)
+
+---
+
+## Technologies Used
+
+- **Next.js** (React framework)
+- **Prisma** (ORM)
+- **PostgreSQL** (database)
+- **NextAuth.js** (authentication)
+- **Google Translate API** (server-side translation)
+- **TypeScript**
+
+---
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE.txt](LICENSE.txt)

@@ -1,0 +1,289 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String?
+  avatar    String?
+  bio       String?
+  preferredLanguage String @default("{\"code\":\"en\",\"name\":\"English\"}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Group memberships
+  groupMemberships GroupMember[]
+  
+  // Group leadership
+  ownedGroups Group[] @relation("GroupOwner")
+  
+  // Messages
+  messages Message[]
+  
+  // Notifications
+  notifications Notification[]
+  
+  // Join Requests
+  joinRequests JoinRequest[]
+  
+  // File uploads
+  uploadedFiles File[]
+  
+  // Milestone submissions
+  milestoneSubmissions MilestoneSubmission[]
+  
+  // Video sessions
+  videoSessionParticipants VideoSessionParticipant[]
+  videoSessions VideoSession[]
+
+  // NextAuth relations
+  accounts Account[]
+  sessions Session[]
+
+  @@map("users")
+}
+
+// NextAuth.js Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  nameTranslationMetadata String @default("{}")
+  description String
+  descriptionTranslationMetadata String @default("{}")
+  subject     String
+  level       String
+  isPrivate   Boolean  @default(false)
+  maxMembers  Int      @default(50)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Owner
+  ownerId String
+  owner   User   @relation("GroupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  // Members
+  members GroupMember[]
+  
+  // Messages
+  messages Message[]
+  
+  // Files
+  files File[]
+  
+  // Milestones
+  milestones Milestone[]
+  
+  // Video sessions
+  videoSessions VideoSession[]
+  
+  // Join requests
+  joinRequests JoinRequest[]
+
+  @@map("groups")
+}
+
+model GroupMember {
+  id        String   @id @default(cuid())
+  userId    String
+  groupId   String
+  role      String   @default("member") // member, moderator, leader
+  joinedAt  DateTime @default(now())
+  
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, groupId])
+  @@map("group_members")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  contentTranslationMetadata String @default("{}")
+  isAI      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  userId  String
+  groupId String
+  
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model File {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  size        Int
+  type        String
+  uploadedAt  DateTime @default(now())
+  
+  userId  String
+  groupId String
+  
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("files")
+}
+
+model Milestone {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  dueDate     DateTime
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  groupId String
+  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  translation_metadata String @default("{}")
+  
+  // Submissions
+  submissions MilestoneSubmission[]
+
+  @@map("milestones")
+}
+
+model MilestoneSubmission {
+  id          String   @id @default(cuid())
+  content     String
+  contentTranslationMetadata String @default("{}")
+  files       String[] // Array of file URLs
+  submittedAt DateTime @default(now())
+  aiVerified  Boolean  @default(false)
+  aiComment   String?
+  aiTranslationMetadata String @default("{}")
+  
+  userId      String
+  milestoneId String
+  
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  milestone Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+
+  @@map("milestone_submissions")
+}
+
+model VideoSession {
+  id          String   @id @default(cuid())
+  title       String
+  titleTranslationMetadata String @default("{}")
+  description String?
+  descriptionTranslationMetadata String @default("{}")
+  startTime   DateTime
+  endTime     DateTime?
+  status      String   @default("scheduled") // scheduled, active, completed, cancelled
+  meetingUrl  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  groupId String
+  group   Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Participants
+  participants VideoSessionParticipant[]
+
+  @@map("video_sessions")
+}
+
+model VideoSessionParticipant {
+  id             String   @id @default(cuid())
+  joinedAt       DateTime @default(now())
+  leftAt         DateTime?
+  
+  userId         String
+  videoSessionId String
+  
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoSession VideoSession @relation(fields: [videoSessionId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, videoSessionId])
+  @@map("video_session_participants")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String   // message, milestone, video_session, group_invite, etc.
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  metadata  String?  // JSON string for additional data
+  createdAt DateTime @default(now())
+  
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model JoinRequest {
+  id        String   @id @default(cuid())
+  message   String?
+  status    String   @default("pending") // pending, approved, rejected
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  userId  String
+  groupId String
+  
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, groupId])
+  @@map("join_requests")
+}
