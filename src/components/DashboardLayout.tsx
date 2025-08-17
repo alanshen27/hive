@@ -29,7 +29,7 @@ function Navbar() {
       <div className="flex h-16 items-center px-4">
         <div className="flex items-center space-x-4">
           <Link href="/" className="flex items-center space-x-4">
-            <Image src="/logo-lg.png" alt="Hive" width={28} height={28} />
+            <Image src="/logo-lg.png" alt="Hive" width={100} height={100} />
           </Link>
         </div>
         

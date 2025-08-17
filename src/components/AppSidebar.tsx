@@ -21,6 +21,8 @@ import { signOut, useSession } from "next-auth/react";
   import { useNotifications } from "@/hooks/useNotifications";
 import { Button } from "./ui/button";
 import Image from "next/image";
+import { User } from "@prisma/client";
+import { useEffect, useState } from "react";
 
 const mainItems = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
@@ -38,6 +40,18 @@ export function AppSidebar() {
   const { data: session } = useSession();
   const { unreadCount } = useNotifications();
 
+  const [user, setUser] = useState<User | null>(null);
+
+  const getUser = async () => {
+    const user = await fetch(`/api/users/${session?.user?.id}`)
+    const userData = await user.json();
+    setUser(userData);
+  }
+
+  useEffect(() => {
+    getUser();
+  }, [session?.user?.id]);
+  
   const isActive = (path: string) => currentPath === path;
 
   const getUserInitials = (name?: string | null) => {
@@ -116,17 +130,17 @@ export function AppSidebar() {
         </SidebarMenu>
         <div className="flex items-center space-x-2 mt-4 p-2 bg-secondary rounded-lg">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={session?.user?.avatar || ""} />
+            <AvatarImage src={user?.avatar || ""} />
             <AvatarFallback>
-              {getUserInitials(session?.user?.name)}
+              {getUserInitials(user?.name)}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">
-              {session?.user?.name || "User"}
+              {user?.name || "User"}
             </p>
             <p className="text-xs text-muted-foreground">
-              {session?.user?.email || "student"}
+              {user?.email || "student"}
             </p>
           </div>
           <Button variant="ghost" size="icon" onClick={() => signOut()}>

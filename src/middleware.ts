@@ -10,7 +10,8 @@ export default auth((req) => {
     "/group",
     "/my-groups", 
     "/create-group",
-    "/onboarding"
+    "/onboarding",
+    "/explore"
   ]
 
   const isProtectedRoute = protectedRoutes.some(route => 
@@ -30,6 +31,7 @@ export const config = {
     "/group/:path*", 
     "/my-groups/:path*",
     "/create-group/:path*",
-    "/onboarding/:path*"
+    "/onboarding/:path*",
+    "/explore/:path*"
   ]
 }
