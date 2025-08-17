@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BookOpen, Mail, Lock, User, ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -111,12 +112,7 @@ export default function AuthPage() {
         </div>
         
         <div className="flex items-center justify-center space-x-2 mb-8">
-          <div className="bg-gradient-primary rounded-lg p-3">
-            <BookOpen className="h-8 w-8 text-white" />
-          </div>
-          <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            StudyHive
-          </span>
+          <Image src="/logo-lg.png" alt="Hive" width={200} height={200} />
         </div>
 
         <Card className="shadow-glow border-border/50">

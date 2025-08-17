@@ -21,6 +21,7 @@ const DONT_SHOW_APP_SIDEBAR = [
   '/',
 ]
 
+
 function Navbar() {
   const { data: session } = useSession();
 
@@ -57,6 +58,7 @@ function Navbar() {
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const { data: session } = useSession();
   const pathname = usePathname();
   if (pathname === '/onboarding') {
     return (
@@ -66,7 +68,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     )
   }
 
-  if (DONT_SHOW_APP_SIDEBAR.includes(pathname)) {
+  if (DONT_SHOW_APP_SIDEBAR.includes(pathname) || !session?.user) {
     return (
       <div className="min-h-screen flex flex-col w-full max-w-full margin-0 p-0">
         <Navbar />
