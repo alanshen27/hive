@@ -39,7 +39,7 @@ function Navbar() {
         <div className="flex items-center space-x-4">
           {session?.user ? (
             <Button variant="default" asChild>
-              <Link href="/app">Go to app</Link>
+              <Link href="/dashboard">Go to app</Link>
             </Button>
           ) : (
             <div className="flex items-center space-x-2">
