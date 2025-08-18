@@ -10,9 +10,9 @@ Too many students study alone. Hive helps connect students across borders and la
 
 | username | password |
 | ---- | -- |
-| alice@example.com | 123 |
-| bob@example.com | 123 |
-| carol@example.com | 123 |
+| alice@example.com | password123 |
+| bob@example.com | password123 |
+| carol@example.com | password123 |
 
 
 1. **Clone the repository:**
