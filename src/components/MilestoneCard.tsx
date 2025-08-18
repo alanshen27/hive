@@ -362,7 +362,7 @@ export function MilestoneCard({ milestone, onEdit, onDelete, groupId }: Mileston
                 <Badge variant={milestone.completed ? "default" : "outline"}>
                   {milestone.completed ? "Completed" : "In Progress"}
                 </Badge>
-                <Badge variant="secondary">{localSubmissions.length} submissions {milestone.id}</Badge>
+                <Badge variant="secondary">{localSubmissions.length} submissions</Badge>
                 {isTranslationEnabled && (
                   <TranslationToggle
                     currentLanguage={displayLanguage}
