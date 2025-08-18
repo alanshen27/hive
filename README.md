@@ -56,9 +56,13 @@ Too many students study alone. Hive helps connect students across borders and la
 
 ## Usage Instructions
 
-- **Sign up** or **log in** to create or join study groups.
-- **Complete the onboarding guide** so we can know you better
+- **Sign up** or **log in** to create or join study groups at `/auth` (click the "Get Started" or "Sign in" button on the Navbar).
+- **Complete the onboarding guide** so we can know you better (at `/onboarding`)
+- **On the sidebar**, you can see all the functions of our app
+- **Head to "Explore"** to join a group, or **create your own**
+- **Go to "My Groups"** To see the groups you are in.
 - **Create milestones** for your group and track progress.
+- **Chat** with our built in AI agent and study mates
 - **Submit work** and receive AI-powered feedback and verification.
 - **Translate content** to your preferred language for a more inclusive experience.
 - **Receive notifications** for group activity, submissions, and milestones.
