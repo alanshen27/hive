@@ -63,7 +63,7 @@ export function AppSidebar() {
     <Sidebar className="w-64">
       <SidebarHeader className="p-4 pb-1">
         <Link href="/dashboard" className="flex items-center space-x-2">
-          <Image src="/logo-lg.png" alt="StudyHive" width={100} height={100} />
+          <Image src="/logo-lg.png" alt="StudyHive" width={100} height={20} />
         </Link>
       </SidebarHeader>
 
