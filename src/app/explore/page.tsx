@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, Search, Users, MessageSquare, Video, Target, Brain, Filter, Plus, Bell, Settings, Star, TrendingUp, Clock, X, Loader2 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import Link from "next/link";
@@ -42,8 +43,54 @@ interface Group {
 const subjects = ["All", "Mathematics", "Chemistry", "Computer Science", "Physics", "Psychology", "Literature", "Biology"];
 const levels = ["All", "High School", "Undergraduate", "Graduate", "Professional"];
 
+// Loading skeleton components
+const GroupCardSkeleton = () => (
+  <Card className="hover:shadow-glow transition-all duration-300">
+    <CardHeader>
+      <div className="flex items-start justify-between mb-2">
+        <Skeleton className="h-6 w-48" />
+        <Skeleton className="h-5 w-16" />
+      </div>
+      <div className="flex items-center space-x-2 mb-2">
+        <Skeleton className="h-5 w-20" />
+        <Skeleton className="h-5 w-24" />
+      </div>
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-3/4" />
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-2 mb-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+      </div>
+      <div className="flex space-x-2">
+        <Skeleton className="h-9 flex-1" />
+        <Skeleton className="h-9 flex-1" />
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const SearchSuggestionsSkeleton = () => (
+  <div className="absolute top-full left-0 right-0 mt-2 bg-card border rounded-xl shadow-lg z-50 overflow-hidden">
+    <div className="p-4">
+      <div className="text-xs font-semibold text-muted-foreground mb-3 tracking-wide">SUGGESTIONS</div>
+      <div className="space-y-1">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex items-center px-3 py-2">
+            <Skeleton className="h-3 w-3 mr-3" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
 export default function ExplorePage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("All");
   const [selectedLevel, setSelectedLevel] = useState("All");
@@ -60,9 +107,11 @@ export default function ExplorePage() {
     preferredLanguage: { code: string; name: string };
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         // Fetch groups
         const groupsResponse = await fetch('/api/groups');
@@ -84,6 +133,7 @@ export default function ExplorePage() {
         }
       } catch (err) {
         console.error('Failed to load groups:', err);
+        toast.error('Failed to load groups. Please refresh the page.');
       } finally {
         setIsLoading(false);
       }
@@ -91,6 +141,19 @@ export default function ExplorePage() {
 
     fetchData();
   }, [session?.user?.id]);
+
+  // Simulate search delay for better UX
+  useEffect(() => {
+    if (searchQuery.length > 2) {
+      setIsSearching(true);
+      const timer = setTimeout(() => {
+        setIsSearching(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setIsSearching(false);
+    }
+  }, [searchQuery]);
 
   // Generate recommendations based on user preferences
   const recommendedGroups = groups.filter(group => {
@@ -323,6 +386,7 @@ export default function ExplorePage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-12 pr-12 h-14 text-base bg-card border-2 focus:border-primary transition-all duration-200 shadow-sm"
+            disabled={isLoading}
           />
           {searchQuery && (
             <Button
@@ -337,7 +401,7 @@ export default function ExplorePage() {
         </div>
         
         {/* Search Suggestions */}
-        {searchQuery && searchQuery.length > 2 && (
+        {searchQuery && searchQuery.length > 2 && !isSearching && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-card border rounded-xl shadow-lg z-50 overflow-hidden">
             <div className="p-4">
               <div className="text-xs font-semibold text-muted-foreground mb-3 tracking-wide">SUGGESTIONS</div>
@@ -358,6 +422,11 @@ export default function ExplorePage() {
             </div>
           </div>
         )}
+
+        {/* Search Suggestions Loading */}
+        {searchQuery && searchQuery.length > 2 && isSearching && (
+          <SearchSuggestionsSkeleton />
+        )}
       </div>
 
       {/* Filters */}
@@ -365,7 +434,7 @@ export default function ExplorePage() {
         <CardContent className="p-6">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex flex-wrap gap-2">
-              <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+              <Select value={selectedSubject} onValueChange={setSelectedSubject} disabled={isLoading}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Subject" />
                 </SelectTrigger>
@@ -378,7 +447,7 @@ export default function ExplorePage() {
                 </SelectContent>
               </Select>
 
-              <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+              <Select value={selectedLevel} onValueChange={setSelectedLevel} disabled={isLoading}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Level" />
                 </SelectTrigger>
@@ -391,9 +460,7 @@ export default function ExplorePage() {
                 </SelectContent>
               </Select>
 
-
-
-              <Select value={sortBy} onValueChange={setSortBy}>
+              <Select value={sortBy} onValueChange={setSortBy} disabled={isLoading}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
@@ -401,7 +468,6 @@ export default function ExplorePage() {
                   <SelectItem value="newest">Newest</SelectItem>
                   <SelectItem value="oldest">Oldest</SelectItem>
                   <SelectItem value="members">Most Members</SelectItem>
-
                 </SelectContent>
               </Select>
             </div>
@@ -412,6 +478,7 @@ export default function ExplorePage() {
                   id="available" 
                   checked={showOnlyAvailable}
                   onCheckedChange={(checked) => setShowOnlyAvailable(checked === true)}
+                  disabled={isLoading}
                 />
                 <Label htmlFor="available" className="text-sm font-medium">
                   Available spots only
@@ -419,7 +486,7 @@ export default function ExplorePage() {
               </div>
 
               {hasActiveFilters && (
-                <Button variant="outline" size="sm" onClick={clearAllFilters}>
+                <Button variant="outline" size="sm" onClick={clearAllFilters} disabled={isLoading}>
                   <X className="h-3 w-3 mr-1" />
                   Clear all
                 </Button>
@@ -429,126 +496,163 @@ export default function ExplorePage() {
         </CardContent>
       </Card>
 
-      {/* Results Summary */}
-      <div className="flex items-center justify-between">
-        <p className="text-muted-foreground">
-          {filteredGroups.length} groups found {searchQuery && `for "${searchQuery}"`}
-        </p>
-      </div>
-
-      {/* Recommended Groups */}
-      {!hasActiveFilters && (
-        <div>
-          <div className="flex items-center mb-4">
-            <TrendingUp className="h-5 w-5 text-primary mr-2" />
-            <h2 className="text-xl font-semibold">
-              {userPreferences ? 'Recommended for You' : 'Popular Groups'}
-            </h2>
-            {!userPreferences && session?.user?.id && (
-              <Badge variant="outline" className="ml-2">
-                <Link href="/onboarding" className="text-xs">
-                  Set preferences
-                </Link>
-              </Badge>
-            )}
-          </div>
-          {recommendedGroups.length > 0 ? (
+      {/* Loading State */}
+      {isLoading && (
+        <div className="space-y-6">
+          {/* Results Summary Skeleton */}
+          <Skeleton className="h-4 w-48" />
+          
+          {/* Recommended Groups Skeleton */}
+          <div>
+            <div className="flex items-center mb-4">
+              <Skeleton className="h-5 w-5 mr-2" />
+              <Skeleton className="h-6 w-48" />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {recommendedGroups.slice(0, 3).map((group) => (
-                <GroupCard key={group.id} group={group} />
+              {[1, 2, 3].map((i) => (
+                <GroupCardSkeleton key={i} />
               ))}
             </div>
-          ) : (
-            <Card className="mb-8">
-              <CardContent className="p-6 text-center">
-                <Brain className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-muted-foreground">
-                  {userPreferences 
-                    ? "No groups match your current preferences. Try adjusting your filters or check back later!"
-                    : "Complete your profile to get personalized recommendations."
-                  }
-                </p>
-                {!userPreferences && session?.user?.id && (
-                  <Button variant="outline" className="mt-3" asChild>
-                    <Link href="/onboarding">
-                      Set Your Preferences
-                    </Link>
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          )}
-          <Separator className="my-8" />
+            <Separator className="my-8" />
+          </div>
+
+          {/* All Groups Skeleton */}
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-96" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <GroupCardSkeleton key={i} />
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
-      {/* All Groups */}
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 max-w-md">
-          <TabsTrigger value="all">All Groups</TabsTrigger>
-          <TabsTrigger value="joined">My Groups</TabsTrigger>
-          <TabsTrigger value="available">Available</TabsTrigger>
-          <TabsTrigger value="new">New</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="all" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredGroups.map((group) => (
-              <GroupCard key={group.id} group={group} />
-            ))}
+      {/* Content when loaded */}
+      {!isLoading && (
+        <>
+          {/* Results Summary */}
+          <div className="flex items-center justify-between">
+            <p className="text-muted-foreground">
+              {filteredGroups.length} groups found {searchQuery && `for "${searchQuery}"`}
+            </p>
           </div>
-        </TabsContent>
 
-        <TabsContent value="joined" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredGroups.filter(group => group.role).map((group) => (
-              <GroupCard key={group.id} group={group} />
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="available" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredGroups.filter(group => !group.role && group._count.members < group.maxMembers).map((group) => (
-              <GroupCard key={group.id} group={group} />
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="new" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredGroups.filter(group => {
-              const groupDate = new Date(group.createdAt);
-              const weekAgo = new Date();
-              weekAgo.setDate(weekAgo.getDate() - 7);
-              return groupDate > weekAgo;
-            }).map((group) => (
-              <GroupCard key={group.id} group={group} />
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {/* Empty State */}
-        {filteredGroups.length === 0 && (
-          <Card className="text-center py-12">
-            <CardContent>
-              <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No groups found</h3>
-              <p className="text-muted-foreground mb-6">
-              Try adjusting your filters or search terms, or create a new group to get started.
-              </p>
-            <div className="flex justify-center space-x-4">
-              <Button variant="default">Create Your Own Group</Button>
-              {hasActiveFilters && (
-                <Button variant="outline" onClick={clearAllFilters}>
-                  Clear Filters
-                </Button>
+          {/* Recommended Groups */}
+          {!hasActiveFilters && (
+            <div>
+              <div className="flex items-center mb-4">
+                <TrendingUp className="h-5 w-5 text-primary mr-2" />
+                <h2 className="text-xl font-semibold">
+                  {userPreferences ? 'Recommended for You' : 'Popular Groups'}
+                </h2>
+                {!userPreferences && session?.user?.id && (
+                  <Badge variant="outline" className="ml-2">
+                    <Link href="/onboarding" className="text-xs">
+                      Set preferences
+                    </Link>
+                  </Badge>
+                )}
+              </div>
+              {recommendedGroups.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  {recommendedGroups.slice(0, 3).map((group) => (
+                    <GroupCard key={group.id} group={group} />
+                  ))}
+                </div>
+              ) : (
+                <Card className="mb-8">
+                  <CardContent className="p-6 text-center">
+                    <Brain className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-muted-foreground">
+                      {userPreferences 
+                        ? "No groups match your current preferences. Try adjusting your filters or check back later!"
+                        : "Complete your profile to get personalized recommendations."
+                      }
+                    </p>
+                    {!userPreferences && session?.user?.id && (
+                      <Button variant="outline" className="mt-3" asChild>
+                        <Link href="/onboarding">
+                          Set Your Preferences
+                        </Link>
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
               )}
+              <Separator className="my-8" />
             </div>
-            </CardContent>
-          </Card>
-        )}
+          )}
+
+          {/* All Groups */}
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="grid w-full grid-cols-4 max-w-md">
+              <TabsTrigger value="all">All Groups</TabsTrigger>
+              <TabsTrigger value="joined">My Groups</TabsTrigger>
+              <TabsTrigger value="available">Available</TabsTrigger>
+              <TabsTrigger value="new">New</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="all" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredGroups.map((group) => (
+                  <GroupCard key={group.id} group={group} />
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="joined" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredGroups.filter(group => group.role).map((group) => (
+                  <GroupCard key={group.id} group={group} />
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="available" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredGroups.filter(group => !group.role && group._count.members < group.maxMembers).map((group) => (
+                  <GroupCard key={group.id} group={group} />
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="new" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredGroups.filter(group => {
+                  const groupDate = new Date(group.createdAt);
+                  const weekAgo = new Date();
+                  weekAgo.setDate(weekAgo.getDate() - 7);
+                  return groupDate > weekAgo;
+                }).map((group) => (
+                  <GroupCard key={group.id} group={group} />
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {/* Empty State */}
+          {filteredGroups.length === 0 && (
+            <Card className="text-center py-12">
+              <CardContent>
+                <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No groups found</h3>
+                <p className="text-muted-foreground mb-6">
+                Try adjusting your filters or search terms, or create a new group to get started.
+                </p>
+                <div className="flex justify-center space-x-4">
+                  <Button variant="default">Create Your Own Group</Button>
+                  {hasActiveFilters && (
+                    <Button variant="outline" onClick={clearAllFilters}>
+                      Clear Filters
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </>
+      )}
     </div>
   );
 }
