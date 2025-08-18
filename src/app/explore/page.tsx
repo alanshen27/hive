@@ -12,7 +12,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, Search, Users, MessageSquare, Video, Target, Brain, Filter, Plus, Bell, Settings, Star, TrendingUp, Clock, X, Loader2 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import Link from "next/link";
@@ -43,51 +42,7 @@ interface Group {
 const subjects = ["All", "Mathematics", "Chemistry", "Computer Science", "Physics", "Psychology", "Literature", "Biology"];
 const levels = ["All", "High School", "Undergraduate", "Graduate", "Professional"];
 
-// Loading skeleton components
-const GroupCardSkeleton = () => (
-  <Card className="hover:shadow-glow transition-all duration-300">
-    <CardHeader>
-      <div className="flex items-start justify-between mb-2">
-        <Skeleton className="h-6 w-48" />
-        <Skeleton className="h-5 w-16" />
-      </div>
-      <div className="flex items-center space-x-2 mb-2">
-        <Skeleton className="h-5 w-20" />
-        <Skeleton className="h-5 w-24" />
-      </div>
-      <Skeleton className="h-4 w-full" />
-      <Skeleton className="h-4 w-3/4" />
-    </CardHeader>
-    <CardContent>
-      <div className="space-y-2 mb-4">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-4 w-20" />
-        </div>
-      </div>
-      <div className="flex space-x-2">
-        <Skeleton className="h-9 flex-1" />
-        <Skeleton className="h-9 flex-1" />
-      </div>
-    </CardContent>
-  </Card>
-);
 
-const SearchSuggestionsSkeleton = () => (
-  <div className="absolute top-full left-0 right-0 mt-2 bg-card border rounded-xl shadow-lg z-50 overflow-hidden">
-    <div className="p-4">
-      <div className="text-xs font-semibold text-muted-foreground mb-3 tracking-wide">SUGGESTIONS</div>
-      <div className="space-y-1">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="flex items-center px-3 py-2">
-            <Skeleton className="h-3 w-3 mr-3" />
-            <Skeleton className="h-4 w-32" />
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-);
 
 export default function ExplorePage() {
   const { data: session, status } = useSession();
@@ -425,7 +380,14 @@ export default function ExplorePage() {
 
         {/* Search Suggestions Loading */}
         {searchQuery && searchQuery.length > 2 && isSearching && (
-          <SearchSuggestionsSkeleton />
+          <div className="absolute top-full left-0 right-0 mt-2 bg-card border rounded-xl shadow-lg z-50 overflow-hidden">
+            <div className="p-4">
+              <div className="text-xs font-semibold text-muted-foreground mb-3 tracking-wide">SUGGESTIONS</div>
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              </div>
+            </div>
+          </div>
         )}
       </div>
 
@@ -498,32 +460,10 @@ export default function ExplorePage() {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="space-y-6">
-          {/* Results Summary Skeleton */}
-          <Skeleton className="h-4 w-48" />
-          
-          {/* Recommended Groups Skeleton */}
-          <div>
-            <div className="flex items-center mb-4">
-              <Skeleton className="h-5 w-5 mr-2" />
-              <Skeleton className="h-6 w-48" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {[1, 2, 3].map((i) => (
-                <GroupCardSkeleton key={i} />
-              ))}
-            </div>
-            <Separator className="my-8" />
-          </div>
-
-          {/* All Groups Skeleton */}
-          <div className="space-y-4">
-            <Skeleton className="h-10 w-96" />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <GroupCardSkeleton key={i} />
-              ))}
-            </div>
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto" />
+            <p className="text-sm text-muted-foreground">Loading study groups...</p>
           </div>
         </div>
       )}

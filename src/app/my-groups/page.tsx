@@ -10,8 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Users, MessageSquare, Video, Target, Clock, Search, Plus, Filter, Star } from "lucide-react";
+import { Users, MessageSquare, Video, Target, Clock, Search, Plus, Filter, Star, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { Session } from "next-auth";
 
 interface Group {
   id: string;
@@ -107,7 +108,7 @@ export default function MyGroupsPage() {
       <div className="flex-1 space-y-6 p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4" />
             <p className="text-muted-foreground">Loading your groups...</p>
           </div>
         </div>
